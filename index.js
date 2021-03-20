@@ -1,8 +1,8 @@
-var crypto = require('crypto')
-var stream = require('stream')
-var fileType = require('file-type')
-var isSvg = require('is-svg')
-var parallel = require('run-parallel')
+const crypto = require('crypto')
+const stream = require('stream')
+const FileType = require('file-type')
+const isSvg = require('is-svg')
+const parallel = require('run-parallel')
 
 function staticValue (value) {
   return function (req, file, cb) {
@@ -10,15 +10,15 @@ function staticValue (value) {
   }
 }
 
-var defaultAcl = staticValue('private')
-var defaultContentType = staticValue('application/octet-stream')
+const defaultAcl = staticValue('private')
+const defaultContentType = staticValue('application/octet-stream')
 
-var defaultMetadata = staticValue(null)
-var defaultCacheControl = staticValue(null)
-var defaultContentDisposition = staticValue(null)
-var defaultStorageClass = staticValue('STANDARD')
-var defaultSSE = staticValue(null)
-var defaultSSEKMS = staticValue(null)
+const defaultMetadata = staticValue(null)
+const defaultCacheControl = staticValue(null)
+const defaultContentDisposition = staticValue(null)
+const defaultStorageClass = staticValue('STANDARD')
+const defaultSSE = staticValue(null)
+const defaultSSEKMS = staticValue(null)
 
 function defaultKey (req, file, cb) {
   crypto.randomBytes(16, function (err, raw) {
@@ -28,23 +28,24 @@ function defaultKey (req, file, cb) {
 
 function autoContentType (req, file, cb) {
   file.stream.once('data', function (firstChunk) {
-    var type = fileType(firstChunk)
-    var mime
+    new Promise((resolve, reject) => resolve(FileType.fromBuffer(firstChunk))).then((type) => {
+      let mime
 
-    if (type) {
-      mime = type.mime
-    } else if (isSvg(firstChunk)) {
-      mime = 'image/svg+xml'
-    } else {
-      mime = 'application/octet-stream'
-    }
+      if (type) {
+        mime = type.mime
+      } else if (isSvg(firstChunk)) {
+        mime = 'image/svg+xml'
+      } else {
+        mime = 'application/octet-stream'
+      }
 
-    var outStream = new stream.PassThrough()
+      const outStream = new stream.PassThrough()
 
-    outStream.write(firstChunk)
-    file.stream.pipe(outStream)
+      outStream.write(firstChunk)
+      file.stream.pipe(outStream)
 
-    cb(null, mime, outStream)
+      cb(null, mime, outStream)
+    })
   })
 }
 
@@ -160,9 +161,9 @@ S3Storage.prototype._handleFile = function (req, file, cb) {
   collect(this, req, file, function (err, opts) {
     if (err) return cb(err)
 
-    var currentSize = 0
+    let currentSize = 0
 
-    var params = {
+    const params = {
       Bucket: opts.bucket,
       Key: opts.key,
       ACL: opts.acl,
@@ -179,7 +180,7 @@ S3Storage.prototype._handleFile = function (req, file, cb) {
       params.ContentDisposition = opts.contentDisposition
     }
 
-    var upload = this.s3.upload(params)
+    const upload = this.s3.upload(params)
 
     upload.on('httpUploadProgress', function (ev) {
       if (ev.total) currentSize = ev.total
