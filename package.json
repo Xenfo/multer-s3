@@ -1,6 +1,6 @@
 {
   "name": "@xenfo/multer-s3",
-  "version": "3.0.3",
+  "version": "3.2.0",
   "description": "Streaming multer storage engine for AWS S3",
   "main": "index.js",
   "scripts": {
@@ -28,7 +28,7 @@
     "run-parallel": "^1.1.6"
   },
   "devDependencies": {
-    "aws-sdk": "^2.2.32",
+    "aws-sdk": "^2.880.0",
     "concat-stream": "^2.0.0",
     "express": "^4.13.1",
     "form-data": "^4.0.0",
